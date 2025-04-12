@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Circles</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            background-color: #add8e6; /* 設置背景顏色為淡藍色 */
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* 讓畫布不影響操作 */
+        }
+
+        #content {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            z-index: 5;
+        }
+
+        .box {
+            width: 120px;
+            height: 50px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 10px;
+            background-color: blue;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        #intro-text, #quiz-container, #info-frame, #video-player {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 7;
+            display: none;
+        }
+
+        #intro-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+        }
+
+        #quiz-container {
+            width: 60%;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #quiz-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .question {
+            margin-bottom: 15px;
+        }
+
+        iframe {
+            width: 80%;
+            height: 80%;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .character {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            display: none;
+            animation: bounce 1s infinite alternate ease-in-out;
+            z-index: 9999;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+        <script>
+            let circles = [];
+
+            function setup() {
+                createCanvas(windowWidth, windowHeight);
+                background('#add8e6');
+                for (let i = 0; i < 100; i++) {
+                    circles.push({
+                        x: random(width),
+                        y: random(height),
+                        size: random(20, 50),
+                        color: color(random(255), random(255), random(255))
+                    });
+                }
+            }
+
+            function draw() {
+                background('#add8e6');
+                for (let circle of circles) {
+                    let d = dist(mouseX, mouseY, circle.x, circle.y);
+                    let newSize = map(d, 0, width / 2, 50, 10);
+                    let newColor = color(
+                        map(d, 0, width / 2, 255, 100),
+                        map(d, 0, width / 2, 100, 255),
+                        map(d, 0, width / 2, 100, 255)
+                    );
+                    fill(newColor);
+                    noStroke();
+                    ellipse(circle.x, circle.y, newSize);
+                }
+            }
+        </script>
+    </div>
+
+    <iframe id="info-frame"></iframe>
+    <iframe id="video-player" src="https://drive.google.com/file/d/1N9PQwNwBLEwVYSOXVGO3XDwgwf_j6m4v/preview" allow="autoplay"></iframe>
+    <div id="intro-text">你好 我喜歡追劇</div>
+
+    <div id="quiz-container">
+        <h2>測驗卷</h2>
+        <div class="question">
+            <p>1. 5 + 3 = ?</p>
+            <label><input type="radio" name="q1" value="6"> 6</label><br>
+            <label><input type="radio" name="q1" value="8"> 8</label><br>
+            <label><input type="radio" name="q1" value="10"> 10</label>
+        </div>
+        <div class="question">
+            <p>2. 12 - 7 = ?</p>
+            <label><input type="radio" name="q2" value="4"> 4</label><br>
+            <label><input type="radio" name="q2" value="5"> 5</label><br>
+            <label><input type="radio" name="q2" value="6"> 6</label>
+        </div>
+        <div class="question">
+            <p>3. 6 × 4 = ?</p>
+            <label><input type="radio" name="q3" value="20"> 20</label><br>
+            <label><input type="radio" name="q3" value="24"> 24</label><br>
+            <label><input type="radio" name="q3" value="28"> 28</label>
+        </div>
+        <button onclick="submitQuiz()">提交答案</button>
+    </div>
+
+    <div id="content">
+        <div class="box" onclick="showWork()">作品集</div>
+        <div class="box" onclick="showIntro()">自我介紹</div>
+        <div class="box" onclick="showQuiz()">測驗卷</div>
+        <div class="box" onclick="showVideo()">教學影片</div>
+    </div>
+
+    <img src="8.png" class="character" id="character" alt="Character">
+
+    <script>
+        function hideAll() {
+            document.getElementById('info-frame').style.display = 'none';
+            document.getElementById('video-player').style.display = 'none';
+            document.getElementById('intro-text').style.display = 'none';
+            document.getElementById('quiz-container').style.display = 'none';
+            document.getElementById('character').style.display = 'none';
+        }
+
+        function showWork() {
+            hideAll();
+            document.getElementById('character').style.display = 'block';
+            const iframe = document.getElementById('info-frame');
+            iframe.src = 'https://hackmd.io/@NHV8Fba9QxOit5ByvW7rfw/rJZpvsfC1l';
+            iframe.style.display = 'block';
+        }
+
+        function showIntro() {
+            hideAll();
+            document.getElementById('intro-text').style.display = 'block';
+        }
+
+        function showQuiz() {
+            hideAll();
+            document.getElementById('quiz-container').style.display = 'block';
+        }
+
+        function showVideo() {
+            hideAll();
+            document.getElementById('video-player').style.display = 'block';
+        }
+
+        function submitQuiz() {
+            const answers = {
+                q1: "8",
+                q2: "5",
+                q3: "24"
+            };
+            let correct = 0;
+            for (const [key, value] of Object.entries(answers)) {
+                const selected = document.querySelector(`input[name="${key}"]:checked`);
+                if (selected && selected.value === value) {
+                    correct++;
+                }
+            }
+            alert(`你答對了 ${correct} 題！`);
+        }
+    </script>
+</body>
+</html>
